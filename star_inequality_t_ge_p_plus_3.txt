@@ -1,0 +1,467 @@
+Ordered-minor avoidance of stars, by center
+==========================================
+
+Statement
+---------
+Let S_{p,r} denote the star on the vertex set {1, 2, ..., p} with center r
+(the other p - 1 vertices are leaves). Its Prufer code is the word r^{p-2}.
+Write N(S_{p,r}, t) for the number of labeled trees on {1, 2, ..., t} that
+avoid S_{p,r} as an ordered minor.
+
+For integers r >= 1 and p > 2r,
+
+    N(S_{p,r}, t) > N(S_{p,r+1}, t)
+
+for every t >= p + 1. Label reversal gives the identity
+
+    N(S_{p,r}, t) = N(S_{p, p+1-r}, t),
+
+so the inequality is the statement that the counts fall strictly as the
+center moves from an end toward the middle of {1, 2, ..., p}.
+
+The cases t = p + 1 and t = p + 2 are proved. This file records every exact
+computation available for t >= p + 3. Every such comparison holds.
+
+Summary
+-------
+Comparisons with t >= p + 3: 56
+Strict inequalities: 56
+Failures: 0
+Stars: p in {3, 4, 5, 6, 7, 8}
+Host orders appearing in at least one comparison: t in {6, 7, 8, 9, 10, 11, 12, 13, 14}
+Complete center-sets (every r = 1, ..., p) at t >= p + 3: 32
+Reversal identities checked on those complete sets: 32, all equal
+Pairs on which the census and the leaf scan both produced a count: 102, all equal
+
+How the counts were obtained
+----------------------------
+Two enumerations are used, and they agree wherever both apply.
+
+Census. An exhaustive contraction search counts N(P, t) for every labeling P
+of every tree on p vertices, for the host orders listed under Sources. A line
+marked Symmetry or Complement in a log was copied by label reversal and is
+not an independent enumeration of that center. Every comparison in the main
+table is between two directly enumerated values.
+
+Leaf scan. Contraction cannot create a leaf, so a tree with at most p - 2
+leaves avoids every star on p vertices, and a tree with at least p leaves
+contains every such star. The only trees that can avoid one p-star and
+contain another have exactly p - 1 leaves. star_order_scan enumerates those
+trees and counts the avoiders B_r(t) of each center. The closed form
+
+    N(S_{p,r}, t) = B_r(t) + sum_{ell = 2}^{p - 2} (t! / ell!) * S(t - 2, t - ell)
+
+recovers the full count. S(n, k) is the Stirling number of the second kind.
+The sum is the number of labeled trees on [t] with at most p - 2 leaves;
+it does not depend on r. For p = 3 the sum is empty.
+
+The leaf scan was checked against the census on every center of every
+overlapping pair (t, p) with 4 <= p <= 8. All 102 counts match.
+At p = 8 and t = 10, which is the last proved order t = p + 2, the scan
+matches the completed run results_t10_p8.txt at all eight centers. The
+interrupted log results_t10_contraction_fixed.txt contains a killed-process
+fragment at the center-2 star and is not used for that order.
+
+For p = 8 and t = 11 the census reached centers 1 and 2 only
+(results_t11_p8.txt). The leaf scan supplies the remaining centers. Its
+counts at centers 1 and 2 equal the census. A later incomplete census row is
+filled from the leaf scan only when every center the census reached agrees
+with the scan.
+
+Coverage for t >= p + 3
+-----------------------
+A slice is complete when every center r = 1, ..., p was counted.
+p    t complete                         t with only some centers
+3    6, 7, 8, 9, 10, 11, 12           -
+4    7, 8, 9, 10, 11, 12, 13          -
+5    8, 9, 10, 11, 12, 13, 14         -
+6    9, 10, 11, 12, 13                -
+7    10, 11, 12, 13                   -
+8    11, 12                           13 (centers 1); 14 (centers 1)
+
+There is no complete computation for p >= 9 at any t >= p + 3.
+Host orders above those listed were not enumerated. The largest gap inside
+the computed range is p = 8 at those t for which the census stopped before
+center 2 and the leaf scan was not run.
+
+Comparisons, t >= p + 3
+-----------------------
+Each row is one instance of the inequality. difference = N(S_{p,r}, t) - N(S_{p,r+1}, t).
+ratio = N(S_{p,r}, t) / N(S_{p,r+1}, t). Both centers were enumerated directly.
+
+  p    t   r       N(S_p,r,t)     N(S_p,r+1,t)       difference          ratio  holds
+-------------------------------------------------------------------------------------
+  3    6   1               16                0               16            inf  yes
+  3    7   1               32                0               32            inf  yes
+  4    7   1             4797             3493             1304     1.37331806  yes
+  3    8   1               64                0               64            inf  yes
+  4    8   1            39591            25411            14180     1.55802605  yes
+  5    8   1           165376           152116            13260     1.08717032  yes
+  5    8   2           152116           147832             4284     1.02897884  yes
+  3    9   1              128                0              128            inf  yes
+  4    9   1           360693           212787           147906     1.69508946  yes
+  5    9   1          2133184          1837534           295650     1.16089498  yes
+  5    9   2          1837534          1748744            88790     1.05077358  yes
+  6    9   1          4094995          4004179            90816     1.02268030  yes
+  6    9   2          4004179          3959563            44616     1.01126791  yes
+  3   10   1              256                0              256            inf  yes
+  4   10   1          3622239          2030793          1591446     1.78365742  yes
+  5   10   1         29095936         23433376          5662560     1.24164508  yes
+  5   10   2         23433376         21905080          1528296     1.06976902  yes
+  6   10   1         72185375         68564983          3620392     1.05280235  yes
+  6   10   2         68564983         66864299          1700684     1.02543486  yes
+  7   10   1         95544576         95036196           508380     1.00534933  yes
+  7   10   2         95036196         94734288           301908     1.00318689  yes
+  7   10   3         94734288         94634172           100116     1.00105793  yes
+  3   11   1              512                0              512            inf  yes
+  4   11   1         39897117         21695845         18201272     1.83892893  yes
+  5   11   1        419388544        317609698        101778846     1.32045258  yes
+  5   11   2        317609698        293440656         24169042     1.08236433  yes
+  6   11   1       1335259675       1220885607        114374068     1.09368123  yes
+  6   11   2       1220885607       1170777817         50107790     1.04279872  yes
+  7   11   1       2095730496       2061905976         33824520     1.01640449  yes
+  7   11   2       2061905976       2042392992         19512984     1.00955398  yes
+  7   11   3       2042392992       2036018952          6374040     1.00313064  yes
+  8   11   1       2331036953       2328519281          2517672     1.00108123  yes
+  8   11   2       2328519281       2326851153          1668128     1.00071690  yes
+  8   11   3       2326851153       2326020185           830968     1.00035725  yes
+  3   12   1             1024                0             1024            inf  yes
+  4   12   1        478942551        255491503        223451048     1.87459287  yes
+  5   12   1       6387736576       4587336292       1800400284     1.39247183  yes
+  5   12   2       4587336292       4214932784        372403508     1.08835337  yes
+  6   12   1      25716611975      22534645995       3181965980     1.14120328  yes
+  6   12   2      22534645995      21258811145       1275834850     1.06001440  yes
+  7   12   1      48679128576      47017130396       1661998180     1.03534878  yes
+  7   12   2      47017130396      46103005904        914124492     1.01982787  yes
+  7   12   3      46103005904      45812028276        290977628     1.00635156  yes
+  8   12   1      59648608271      59380945811        267662460     1.00450755  yes
+  8   12   2      59380945811      59207013691        173932120     1.00293769  yes
+  8   12   3      59207013691      59121400487         85613204     1.00144809  yes
+  4   13   1       6226843653       3279051015       2947792638     1.89897736  yes
+  5   13   1     102750037504      70569274246      32180763258     1.45601664  yes
+  5   13   2      70569274246      64784740072       5784534174     1.08928853  yes
+  6   13   1     514199306275     431514536963      82684769312     1.19161526  yes
+  6   13   2     431514536963     401545896991      29968639972     1.07463316  yes
+  7   13   1    1179085942656    1110842145576      68243797080     1.06143429  yes
+  7   13   2    1110842145576    1075609096032      35233049544     1.03275637  yes
+  7   13   3    1075609096032    1064790261360      10818834672     1.01016053  yes
+  5   14   1    1743582601216    1153799087728     589783513488     1.51116656  yes
+  5   14   2    1153799087728    1061465291768      92333795960     1.08698711  yes
+
+Every comparison above uses two directly enumerated counts.
+
+For p = 3 the right-hand count is zero throughout the computed range
+6 <= t <= 12: every labeled tree on [t] contains S_{3,2} as an ordered minor.
+The left-hand count is N(S_{3,1}, t) = 2^{t-2}. The inequality is then
+2^{t-2} > 0, and the ratio is infinite. From p = 4 upward both sides are
+positive. At the first open order t = p + 3, the ratio for r = 1 falls
+toward 1 as p runs from 4 to 8: 1.373, 1.087, 1.023, 1.005, 1.001.
+
+Full counts, t >= p + 3
+-----------------------
+common is the number of labeled trees on [t] with at most p - 2 leaves.
+B_r = N(S_{p,r}, t) - common is the number of (p - 1)-leaf avoiders of that center.
+direct = yes means the center was enumerated, not copied by reversal.
+On a complete slice the sequence in r decreases strictly up to the middle
+and then mirrors: N(S_{p,r}, t) = N(S_{p, p+1-r}, t).
+
+  p    t   r       N(S_p,r,t)           common              B_r  direct  source
+-------------------------------------------------------------------------------
+  3    6   1               16                0               16  yes     results_t6_contraction_fixed.txt
+  3    6   2                0                0                0  yes     results_t6_contraction_fixed.txt
+  3    6   3               16                0               16  no      results_t6_contraction_fixed.txt
+  3    7   1               32                0               32  yes     results_t7_contraction_fixed.txt
+  3    7   2                0                0                0  yes     results_t7_contraction_fixed.txt
+  3    7   3               32                0               32  no      results_t7_contraction_fixed.txt
+  4    7   1             4797             2520             2277  yes     results_t7_contraction_fixed.txt
+  4    7   2             3493             2520              973  yes     results_t7_contraction_fixed.txt
+  4    7   3             3493             2520              973  no      results_t7_contraction_fixed.txt
+  4    7   4             4797             2520             2277  yes     results_t7_contraction_fixed.txt
+  3    8   1               64                0               64  yes     results_t8_contraction_fixed.txt
+  3    8   2                0                0                0  yes     results_t8_contraction_fixed.txt
+  3    8   3               64                0               64  no      results_t8_contraction_fixed.txt
+  4    8   1            39591            20160            19431  yes     results_t8_contraction_fixed.txt
+  4    8   2            25411            20160             5251  yes     results_t8_contraction_fixed.txt
+  4    8   3            25411            20160             5251  no      results_t8_contraction_fixed.txt
+  4    8   4            39591            20160            19431  yes     results_t8_contraction_fixed.txt
+  5    8   1           165376           120960            44416  yes     results_t8_contraction_fixed.txt
+  5    8   2           152116           120960            31156  yes     results_t8_contraction_fixed.txt
+  5    8   3           147832           120960            26872  yes     results_t8_contraction_fixed.txt
+  5    8   4           152116           120960            31156  no      results_t8_contraction_fixed.txt
+  5    8   5           165376           120960            44416  yes     results_t8_contraction_fixed.txt
+  3    9   1              128                0              128  yes     results_t9_contraction_fixed.txt
+  3    9   2                0                0                0  yes     results_t9_contraction_fixed.txt
+  3    9   3              128                0              128  no      results_t9_contraction_fixed.txt
+  4    9   1           360693           181440           179253  yes     results_t9_p4.txt
+  4    9   2           212787           181440            31347  yes     results_t9_p4.txt
+  4    9   3           212787           181440            31347  no      results_t9_p4.txt
+  4    9   4           360693           181440           179253  yes     results_t9_contraction_fixed.txt
+  5    9   1          2133184          1451520           681664  yes     results_t9_contraction_fixed.txt
+  5    9   2          1837534          1451520           386014  yes     results_t9_contraction_fixed.txt
+  5    9   3          1748744          1451520           297224  yes     results_t9_contraction_fixed.txt
+  5    9   4          1837534          1451520           386014  no      results_t9_contraction_fixed.txt
+  5    9   5          2133184          1451520           681664  yes     results_t9_contraction_fixed.txt
+  6    9   1          4094995          3568320           526675  yes     results_t9_contraction_fixed.txt
+  6    9   2          4004179          3568320           435859  yes     results_t9_contraction_fixed.txt
+  6    9   3          3959563          3568320           391243  yes     results_t9_contraction_fixed.txt
+  6    9   4          3959563          3568320           391243  no      results_t9_contraction_fixed.txt
+  6    9   5          4004179          3568320           435859  no      results_t9_contraction_fixed.txt
+  6    9   6          4094995          3568320           526675  yes     results_t9_contraction_fixed.txt
+  3   10   1              256                0              256  yes     results_t10_contraction_fixed.txt
+  3   10   2                0                0                0  yes     results_t10_contraction_fixed.txt
+  3   10   3              256                0              256  yes     results_t10_contraction_fixed.txt
+  4   10   1          3622239          1814400          1807839  yes     results_t10_contraction_fixed.txt
+  4   10   2          2030793          1814400           216393  yes     results_t10_contraction_fixed.txt
+  4   10   3          2030793          1814400           216393  yes     results_t10_contraction_fixed.txt
+  4   10   4          3622239          1814400          1807839  yes     results_t10_contraction_fixed.txt
+  5   10   1         29095936         18748800         10347136  yes     results_t10_contraction_fixed.txt
+  5   10   2         23433376         18748800          4684576  yes     results_t10_contraction_fixed.txt
+  5   10   3         21905080         18748800          3156280  yes     results_t10_contraction_fixed.txt
+  5   10   4         23433376         18748800          4684576  no      results_t10_contraction_fixed.txt
+  5   10   5         29095936         18748800         10347136  yes     results_t10_contraction_fixed.txt
+  6   10   1         72185375         58968000         13217375  yes     results_t10_contraction_fixed.txt
+  6   10   2         68564983         58968000          9596983  yes     results_t10_contraction_fixed.txt
+  6   10   3         66864299         58968000          7896299  yes     results_t10_contraction_fixed.txt
+  6   10   4         66864299         58968000          7896299  no      results_t10_contraction_fixed.txt
+  6   10   5         68564983         58968000          9596983  no      results_t10_contraction_fixed.txt
+  6   10   6         72185375         58968000         13217375  yes     results_t10_contraction_fixed.txt
+  7   10   1         95544576         90720000          4824576  yes     results_t10_contraction_fixed.txt
+  7   10   2         95036196         90720000          4316196  yes     results_t10_contraction_fixed.txt
+  7   10   3         94734288         90720000          4014288  yes     results_t10_contraction_fixed.txt
+  7   10   4         94634172         90720000          3914172  yes     results_t10_contraction_fixed.txt
+  7   10   5         94734288         90720000          4014288  no      results_t10_contraction_fixed.txt
+  7   10   6         95036196         90720000          4316196  no      results_t10_contraction_fixed.txt
+  7   10   7         95544576         90720000          4824576  yes     results_t10_contraction_fixed.txt
+  3   11   1              512                0              512  yes     results_t11_contraction_fixed.txt
+  3   11   2                0                0                0  yes     results_t11_contraction_fixed.txt
+  3   11   3              512                0              512  no      results_t11_contraction_fixed.txt
+  4   11   1         39897117         19958400         19938717  yes     results_t11_contraction_fixed.txt
+  4   11   2         21695845         19958400          1737445  yes     results_t11_contraction_fixed.txt
+  4   11   3         21695845         19958400          1737445  no      results_t11_contraction_fixed.txt
+  4   11   4         39897117         19958400         19938717  yes     results_t11_contraction_fixed.txt
+  5   11   1        419388544        259459200        159929344  yes     results_t11_contraction_fixed.txt
+  5   11   2        317609698        259459200         58150498  yes     results_t11_contraction_fixed.txt
+  5   11   3        293440656        259459200         33981456  yes     results_t11_contraction_fixed.txt
+  5   11   4        317609698        259459200         58150498  no      results_t11_contraction_fixed.txt
+  5   11   5        419388544        259459200        159929344  yes     results_t11_contraction_fixed.txt
+  6   11   1       1335259675       1027857600        307402075  yes     results_t11_contraction_fixed.txt
+  6   11   2       1220885607       1027857600        193028007  yes     results_t11_contraction_fixed.txt
+  6   11   3       1170777817       1027857600        142920217  yes     results_t11_contraction_fixed.txt
+  6   11   4       1170777817       1027857600        142920217  no      results_t11_contraction_fixed.txt
+  6   11   5       1220885607       1027857600        193028007  no      results_t11_contraction_fixed.txt
+  6   11   6       1335259675       1027857600        307402075  yes     results_t11_contraction_fixed.txt
+  7   11   1       2095730496       1908023040        187707456  yes     results_t11_p7.txt
+  7   11   2       2061905976       1908023040        153882936  yes     results_t11_p7.txt
+  7   11   3       2042392992       1908023040        134369952  yes     results_t11_p7.txt
+  7   11   4       2036018952       1908023040        127995912  yes     results_t11_p7.txt
+  7   11   5       2042392992       1908023040        134369952  no      results_t11_p7.txt
+  7   11   6       2061905976       1908023040        153882936  no      results_t11_p7.txt
+  7   11   7       2095730496       1908023040        187707456  yes     results_t11_contraction_fixed.txt
+  8   11   1       2331036953       2293386480         37650473  yes     results_t11_p8.txt
+  8   11   2       2328519281       2293386480         35132801  yes     results_t11_p8.txt
+  8   11   3       2326851153       2293386480         33464673  yes     star_order_scan
+  8   11   4       2326020185       2293386480         32633705  yes     star_order_scan
+  8   11   5       2326020185       2293386480         32633705  yes     star_order_scan
+  8   11   6       2326851153       2293386480         33464673  yes     star_order_scan
+  8   11   7       2328519281       2293386480         35132801  yes     star_order_scan
+  8   11   8       2331036953       2293386480         37650473  yes     star_order_scan
+  3   12   1             1024                0             1024  yes     results_t12_contraction_fixed.txt
+  3   12   2                0                0                0  yes     results_t12_contraction_fixed.txt
+  3   12   3             1024                0             1024  no      results_t12_contraction_fixed.txt
+  4   12   1        478942551        239500800        239441751  yes     results_t12_contraction_fixed.txt
+  4   12   2        255491503        239500800         15990703  yes     results_t12_contraction_fixed.txt
+  4   12   3        255491503        239500800         15990703  no      results_t12_contraction_fixed.txt
+  4   12   4        478942551        239500800        239441751  yes     results_t12_contraction_fixed.txt
+  5   12   1       6387736576       3832012800       2555723776  yes     results_t12_contraction_fixed.txt
+  5   12   2       4587336292       3832012800        755323492  yes     results_t12_contraction_fixed.txt
+  5   12   3       4214932784       3832012800        382919984  yes     results_t12_contraction_fixed.txt
+  5   12   4       4587336292       3832012800        755323492  no      results_t12_contraction_fixed.txt
+  5   12   5       6387736576       3832012800       2555723776  yes     results_t12_contraction_fixed.txt
+  6   12   1      25716611975      18800812800       6915799175  yes     results_t12_contraction_fixed.txt
+  6   12   2      22534645995      18800812800       3733833195  yes     results_t12_contraction_fixed.txt
+  6   12   3      21258811145      18800812800       2457998345  yes     results_t12_contraction_fixed.txt
+  6   12   4      21258811145      18800812800       2457998345  no      results_t12_contraction_fixed.txt
+  6   12   5      22534645995      18800812800       3733833195  no      results_t12_contraction_fixed.txt
+  6   12   6      25716611975      18800812800       6915799175  yes     results_t12_contraction_fixed.txt
+  7   12   1      48679128576      42271891200       6407237376  yes     results_t12_contraction_fixed.txt
+  7   12   2      47017130396      42271891200       4745239196  yes     results_t12_contraction_fixed.txt
+  7   12   3      46103005904      42271891200       3831114704  yes     results_t12_contraction_fixed.txt
+  7   12   4      45812028276      42271891200       3540137076  yes     results_t12_contraction_fixed.txt
+  7   12   5      46103005904      42271891200       3831114704  no      results_t12_contraction_fixed.txt
+  7   12   6      47017130396      42271891200       4745239196  no      results_t12_contraction_fixed.txt
+  7   12   7      48679128576      42271891200       6407237376  yes     results_t12_contraction_fixed.txt
+  8   12   1      59648608271      57458237760       2190370511  yes     results_t12_contraction_fixed.txt
+  8   12   2      59380945811      57458237760       1922708051  yes     star_order_scan
+  8   12   3      59207013691      57458237760       1748775931  yes     star_order_scan
+  8   12   4      59121400487      57458237760       1663162727  yes     star_order_scan
+  8   12   5      59121400487      57458237760       1663162727  yes     star_order_scan
+  8   12   6      59207013691      57458237760       1748775931  yes     star_order_scan
+  8   12   7      59380945811      57458237760       1922708051  yes     star_order_scan
+  8   12   8      59648608271      57458237760       2190370511  yes     star_order_scan
+  4   13   1       6226843653       3113510400       3113333253  yes     results_t13_p4.txt
+  4   13   2       3279051015       3113510400        165540615  yes     results_t13_p4.txt
+  4   13   3       3279051015       3113510400        165540615  no      results_t13_p4.txt
+  4   13   4       6226843653       3113510400       3113333253  no      results_t13_p4.txt
+  5   13   1     102750037504      60194534400      42555503104  yes     results_t13_p5.txt
+  5   13   2      70569274246      60194534400      10374739846  yes     results_t13_p5.txt
+  5   13   3      64784740072      60194534400       4590205672  yes     results_t13_p5.txt
+  5   13   4      70569274246      60194534400      10374739846  no      results_t13_p5.txt
+  5   13   5     102750037504      60194534400      42555503104  no      results_t13_p5.txt
+  6   13   1     514199306275     359869910400     154329395875  yes     results_t13_p6.txt
+  6   13   2     431514536963     359869910400      71644626563  yes     results_t13_p6.txt
+  6   13   3     401545896991     359869910400      41675986591  yes     results_t13_p6.txt
+  6   13   4     401545896991     359869910400      41675986591  no      results_t13_p6.txt
+  6   13   5     431514536963     359869910400      71644626563  no      results_t13_p6.txt
+  6   13   6     514199306275     359869910400     154329395875  no      results_t13_p6.txt
+  7   13   1    1179085942656     976344969600     202740973056  yes     results_t13_p7.txt
+  7   13   2    1110842145576     976344969600     134497175976  yes     results_t13_p7.txt
+  7   13   3    1075609096032     976344969600      99264126432  yes     results_t13_p7.txt
+  7   13   4    1064790261360     976344969600      88445291760  yes     results_t13_p7.txt
+  7   13   5    1075609096032     976344969600      99264126432  no      results_t13_p7.txt
+  7   13   6    1110842145576     976344969600     134497175976  no      results_t13_p7.txt
+  7   13   7    1179085942656     976344969600     202740973056  no      results_t13_p7.txt
+  8   13   1    1636196170217    1529745497280     106450672937  yes     results_t13_p8.txt
+  5   14   1    1743582601216    1002550348800     741032252416  yes     results_t14_p5.txt
+  5   14   2    1153799087728    1002550348800     151248738928  yes     results_t14_p5.txt
+  5   14   3    1061465291768    1002550348800      58914942968  yes     results_t14_p5.txt
+  5   14   4    1153799087728    1002550348800     151248738928  no      results_t14_p5.txt
+  5   14   5    1743582601216    1002550348800     741032252416  no      results_t14_p5.txt
+  8   14   1   47252411987039   42633453582720    4618958404319  yes     results_t14_p8.txt
+
+Slices that do not test the inequality
+--------------------------------------
+These centers were counted, but a neighboring center required by the
+inequality was not. They are not comparisons.
+
+  p    t   r       N(S_p,r,t)     N(S_p,r+1,t)
+  8   13   1    1636196170217                -
+  8   13   2                -                -
+  8   13   3                -                -
+  8   14   1   47252411987039                -
+  8   14   2                -                -
+  8   14   3                -                -
+
+Proved range, recorded from the same counts
+-------------------------------------------
+The inequalities at t = p + 1 and t = p + 2 are theorems. The same
+enumerations produce the following values. They are not part of the
+computational claim above. A row is omitted when either center is missing.
+
+  p    t   case   r       N(S_p,r,t)     N(S_p,r+1,t)       difference  holds
+-----------------------------------------------------------------------------
+  3    4    p+1   1                4                2                2  yes
+  3    5    p+2   1                8                0                8  yes
+  4    5    p+1   1               93               89                4  yes
+  4    6    p+2   1              639              541               98  yes
+  5    6    p+1   1             1216             1210                6  yes
+  5    6    p+1   2             1210             1208                2  yes
+  5    7    p+2   1            13624            13198              426  yes
+  5    7    p+2   2            13198            13056              142  yes
+  6    7    p+1   1            16615            16607                8  yes
+  6    7    p+1   2            16607            16603                4  yes
+  6    8    p+2   1           248135           246683             1452  yes
+  6    8    p+2   2           246683           245957              726  yes
+  7    8    p+1   1           261696           261686               10  yes
+  7    8    p+1   2           261686           261680                6  yes
+  7    8    p+1   3           261680           261678                2  yes
+  7    9    p+2   1          4725216          4720856             4360  yes
+  7    9    p+2   2          4720856          4718240             2616  yes
+  7    9    p+2   3          4718240          4717368              872  yes
+  8    9    p+1   1          4781945          4781933               12  yes
+  8    9    p+1   2          4781933          4781925                8  yes
+  8    9    p+1   3          4781925          4781921                4  yes
+  8   10    p+2   1         99772799         99760673            12126  yes
+  8   10    p+2   2         99760673         99752589             8084  yes
+  8   10    p+2   3         99752589         99748547             4042  yes
+  9   10    p+1   1         99997696         99997682               14  yes
+  9   10    p+1   2         99997682         99997672               10  yes
+
+Proved-range comparisons recorded: 26, all strict.
+
+Sources
+-------
+  results_t4_contraction_fixed.txt
+  results_t5_contraction_fixed.txt
+  results_t6_contraction_fixed.txt
+  results_t7_contraction_fixed.txt
+  results_t8_contraction_fixed.txt
+  results_t9_contraction_fixed.txt
+  results_t10_contraction_fixed.txt
+  results_t11_contraction_fixed.txt
+  results_t12_contraction_fixed.txt
+  results_t5_p4.txt
+  results_t6_p4.txt
+  results_t9_p4.txt
+  results_t13_p4.txt
+  results_t13_p5.txt
+  results_t13_p6.txt
+  results_t13_p7.txt
+  results_t14_p5.txt
+  results_t11_p7.txt
+  results_t10_p8.txt
+  results_t11_p8.txt
+  results_t13_p8.txt
+  results_t14_p8.txt
+  star_order_scan on the (p - 1)-leaf trees, logs star_rho_p4.txt through star_rho_p8.txt
+  star_rho_p8_t12.txt
+
+Machine-readable comparisons
+----------------------------
+p	t	r	N_r	N_r_plus_1	difference	ratio
+3	6	1	16	0	16	inf
+3	7	1	32	0	32	inf
+4	7	1	4797	3493	1304	1.373318064701
+3	8	1	64	0	64	inf
+4	8	1	39591	25411	14180	1.558026051710
+5	8	1	165376	152116	13260	1.087170317389
+5	8	2	152116	147832	4284	1.028978840846
+3	9	1	128	0	128	inf
+4	9	1	360693	212787	147906	1.695089455653
+5	9	1	2133184	1837534	295650	1.160894982079
+5	9	2	1837534	1748744	88790	1.050773583784
+6	9	1	4094995	4004179	90816	1.022680304752
+6	9	2	4004179	3959563	44616	1.011267910120
+3	10	1	256	0	256	inf
+4	10	1	3622239	2030793	1591446	1.783657418555
+5	10	1	29095936	23433376	5662560	1.241645079224
+5	10	2	23433376	21905080	1528296	1.069769021615
+6	10	1	72185375	68564983	3620392	1.052802346644
+6	10	2	68564983	66864299	1700684	1.025434858743
+7	10	1	95544576	95036196	508380	1.005349330270
+7	10	2	95036196	94734288	301908	1.003186892585
+7	10	3	94734288	94634172	100116	1.001057926517
+3	11	1	512	0	512	inf
+4	11	1	39897117	21695845	18201272	1.838928928558
+5	11	1	419388544	317609698	101778846	1.320452576357
+5	11	2	317609698	293440656	24169042	1.082364326503
+6	11	1	1335259675	1220885607	114374068	1.093681232168
+6	11	2	1220885607	1170777817	50107790	1.042798718316
+7	11	1	2095730496	2061905976	33824520	1.016404491957
+7	11	2	2061905976	2042392992	19512984	1.009553981078
+7	11	3	2042392992	2036018952	6374040	1.003130638835
+8	11	1	2331036953	2328519281	2517672	1.001081233048
+8	11	2	2328519281	2326851153	1668128	1.000716903614
+8	11	3	2326851153	2326020185	830968	1.000357248834
+3	12	1	1024	0	1024	inf
+4	12	1	478942551	255491503	223451048	1.874592874425
+5	12	1	6387736576	4587336292	1800400284	1.392471833194
+5	12	2	4587336292	4214932784	372403508	1.088353368152
+6	12	1	25716611975	22534645995	3181965980	1.141203282302
+6	12	2	22534645995	21258811145	1275834850	1.060014402560
+7	12	1	48679128576	47017130396	1661998180	1.035348779604
+7	12	2	47017130396	46103005904	914124492	1.019827871829
+7	12	3	46103005904	45812028276	290977628	1.006351555235
+8	12	1	59648608271	59380945811	267662460	1.004507547941
+8	12	2	59380945811	59207013691	173932120	1.002937694526
+8	12	3	59207013691	59121400487	85613204	1.001448091610
+4	13	1	6226843653	3279051015	2947792638	1.898977364035
+5	13	1	102750037504	70569274246	32180763258	1.456016638995
+5	13	2	70569274246	64784740072	5784534174	1.089288529484
+6	13	1	514199306275	431514536963	82684769312	1.191615257956
+6	13	2	431514536963	401545896991	29968639972	1.074633161979
+7	13	1	1179085942656	1110842145576	68243797080	1.061434288708
+7	13	2	1110842145576	1075609096032	35233049544	1.032756370018
+7	13	3	1075609096032	1064790261360	10818834672	1.010160531200
+5	14	1	1743582601216	1153799087728	589783513488	1.511166562499
+5	14	2	1153799087728	1061465291768	92333795960	1.086987107987
+
