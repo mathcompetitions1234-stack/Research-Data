@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 CHART = ROOT.parent / "cutoff_table.tsv"
+NOTES = ROOT.parent / "cutoffs.txt"
 OUT_CSV = ROOT / "cutoffs.csv"
 OUT_TABLE = ROOT / "cutoff_table.tex"
 OUT_DOC = ROOT / "cutoff_appendix.tex"
@@ -77,6 +78,47 @@ def shape_plain_and_tex(raw: str) -> tuple[str, str]:
     raise SystemExit(f"unrecognized shape: {raw}")
 
 
+def canonical_shape(raw: str) -> str:
+    """Shape key shared by the chart wording and the notes wording."""
+    raw = " ".join(raw.replace("\u2013", "-").split())
+    if raw in ("star", "path", "three vertices of degree 3, distances 1, 1, 2"):
+        return raw
+    if raw.startswith("branches:"):
+        return "three vertices of degree 3, distances 1, 1, 2"
+    if "spider" in raw and "legs" in raw:
+        legs = raw.split("legs", 1)[1]
+        legs = legs.replace("(", " ").replace(")", " ")
+        parts = [part.strip() for part in legs.split(",") if part.strip()]
+        return "spider with legs (" + ",".join(parts) + ")"
+    match = re.search(
+        r"degrees (\d+) and (\d+), distance (\d+), arms (\([^)]+\)) and (\([^)]+\))",
+        raw,
+    )
+    if match:
+        left_deg, right_deg, distance, left_arm, right_arm = match.groups()
+        if left_deg == right_deg and left_arm > right_arm:
+            left_arm, right_arm = right_arm, left_arm
+        return (
+            f"hubs of degrees {left_deg} and {right_deg}, "
+            f"distance {distance}, arms {left_arm} and {right_arm}"
+        )
+    raise SystemExit(f"unrecognized shape: {raw}")
+
+
+def load_prufer() -> dict[tuple[int, str], tuple[int, ...]]:
+    text = NOTES.read_text(encoding="utf-8")
+    found: dict[tuple[int, str], tuple[int, ...]] = {}
+    for block in re.split(r"\n={10,}\n|\n-{10,}\n", text):
+        order = re.search(r"^p = (\d+)\s*$", block, re.M)
+        shape = re.search(r"^shape: (.+)\s*$", block, re.M)
+        code = re.search(r"^example Pr\u00fcfer code: \[([0-9, ]+)\]\s*$", block, re.M)
+        if not (order and shape and code):
+            continue
+        key = (int(order.group(1)), canonical_shape(shape.group(1)))
+        found[key] = tuple(int(part) for part in code.group(1).split(","))
+    return found
+
+
 def load_rows() -> list[dict]:
     rows = []
     for line in CHART.read_text(encoding="utf-8").splitlines():
@@ -94,6 +136,7 @@ def load_rows() -> list[dict]:
             {
                 "p": p,
                 "shape": plain,
+                "shape_key": canonical_shape(plain),
                 "shape_tex": tex,
                 "diameter": diameter,
                 "cutoff": cutoff,
@@ -107,6 +150,7 @@ def load_rows() -> list[dict]:
             {
                 "p": p,
                 "shape": plain,
+                "shape_key": canonical_shape(plain),
                 "shape_tex": tex,
                 "diameter": diameter,
                 "cutoff": bound,
@@ -121,6 +165,16 @@ def load_rows() -> list[dict]:
         got[row["p"]] = got.get(row["p"], 0) + 1
     if got != expected:
         raise SystemExit(f"tree counts {got} do not match {expected}")
+    codes = load_prufer()
+    for row in rows:
+        key = (row["p"], row["shape_key"])
+        try:
+            code = codes[key]
+        except KeyError as exc:
+            raise SystemExit(f"no Prüfer code for {key}") from exc
+        if len(code) != row["p"] - 2:
+            raise SystemExit(f"Prüfer length for {key} is {len(code)}")
+        row["prufer"] = code
     return rows
 
 
@@ -132,13 +186,19 @@ def cutoff_csv(row: dict) -> str:
 
 def cutoff_tex(row: dict) -> str:
     if row["bound"]:
-        return f"$\\ge {row['cutoff']}^{{*}}$"
+        return f"$\\ge {row['cutoff']}$"
     return f"${row['cutoff']}$"
+
+
+def prufer_tex(row: dict) -> str:
+    return "$[" + ",".join(str(entry) for entry in row["prufer"]) + "]$"
 
 
 def write_csv(rows: list[dict]) -> None:
     with OUT_CSV.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["p", "shape", "diameter", "cutoff"])
+        writer = csv.DictWriter(
+            handle, fieldnames=["p", "shape", "diameter", "cutoff", "prufer"]
+        )
         writer.writeheader()
         for row in rows:
             writer.writerow(
@@ -147,6 +207,7 @@ def write_csv(rows: list[dict]) -> None:
                     "shape": row["shape"],
                     "diameter": row["diameter"],
                     "cutoff": cutoff_csv(row),
+                    "prufer": "[" + ",".join(str(entry) for entry in row["prufer"]) + "]",
                 }
             )
 
@@ -159,25 +220,25 @@ def write_table(rows: list[dict]) -> None:
             body.append(r"\addlinespace[0.35em]")
         previous_p = row["p"]
         body.append(
-            f"${row['p']}$ & {row['shape_tex']} & ${row['diameter']}$ & {cutoff_tex(row)} \\\\"
+            f"${row['p']}$ & {row['shape_tex']} & ${row['diameter']}$ & {cutoff_tex(row)} & {prufer_tex(row)} \\\\"
         )
 
     OUT_TABLE.write_text(
         r"""\small
-\begin{longtable}{@{} c >{\raggedright\arraybackslash}p{4.55in} c c @{}}
+\begin{longtable}{@{} c >{\raggedright\arraybackslash}p{3.65in} c c c @{}}
 \caption{Cutoffs of unlabeled trees on $4\le p\le 8$ vertices.}
 \label{tab:cutoffs}\\
 \toprule
-$p$ & Shape & Diameter & Cutoff \\
+$p$ & Shape & Diameter & Cutoff & Pr\"ufer code \\
 \midrule
 \endfirsthead
-\multicolumn{4}{@{}l}{\tablename\ \thetable, continued}\\[0.4em]
+\multicolumn{5}{@{}l}{\tablename\ \thetable, continued}\\[0.4em]
 \toprule
-$p$ & Shape & Diameter & Cutoff \\
+$p$ & Shape & Diameter & Cutoff & Pr\"ufer code \\
 \midrule
 \endhead
 \midrule
-\multicolumn{4}{r@{}}{\emph{Continued on the next page}}\\
+\multicolumn{5}{r@{}}{\emph{Continued on the next page}}\\
 \endfoot
 \bottomrule
 \endlastfoot
@@ -186,7 +247,6 @@ $p$ & Shape & Diameter & Cutoff \\
         + "\n"
         + r"""\end{longtable}
 \normalsize
-\noindent{\footnotesize $^{*}$Lower bound. A non-reversal collision remains on the tables computed for this shape, and no complete table has separated its labelings.}
 """,
         encoding="utf-8",
     )
@@ -195,38 +255,15 @@ $p$ & Shape & Diameter & Cutoff \\
 def write_document() -> None:
     OUT_DOC.write_text(
         r"""\documentclass[11pt]{article}
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=0.7in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
-\usepackage[hidelinks]{hyperref}
-
-\title{Appendix. Cutoffs of unlabeled trees}
-\author{}
-\date{}
 
 \begin{document}
-\maketitle
-\thispagestyle{plain}
-\vspace{-2.5em}
-
-Let $p\ge 2$, and let a \emph{shape} be an unlabeled tree on $p$ vertices. The \emph{diameter} of a shape is the number of edges on a longest path. For a labeling $P$ of a shape and a host order $t\ge p$, write $N(P,t)$ for the number of labeled trees on the vertex set $[t]$ that avoid $P$ as an ordered minor. Write $C(P)$ for the labeling obtained by replacing each label $i$ with $p+1-i$.
-
-The \emph{cutoff} of a shape is the smallest integer $t$ such that, for labelings $P$ and $Q$ of that shape,
-\[
-N(P,t)=N(Q,t) \quad\text{implies}\quad Q=P \text{ or } Q=C(P).
-\]
-At $t=p$ every labeling has the same count, so every cutoff is at least $p+1$. A cutoff is recorded only when every labeling has been counted at that host order and at every smaller host order down to $p+1$, and each of those smaller orders still has a collision outside a reversal pair.
-
-A \emph{spider} has a single vertex of degree greater than $2$; its legs are the path lengths from that vertex to the leaves. A pair of \emph{hubs} is the pair of vertices of degree greater than $2$. Their distance is the number of edges of the unique path joining them, and an arm length is the number of edges from that hub out to a leaf along a path that does not contain the other hub. The two lists of arm lengths are written in the same order as the two degrees. The one remaining shape has three vertices of degree $3$, and the three numbers are the pairwise distances among those vertices.
-
-Table~\ref{tab:cutoffs} lists every unlabeled tree on $4\le p\le 8$ vertices. Forty-one cutoffs are exact. The four marked entries on eight vertices are lower bounds.
-
 \input{cutoff_table.tex}
-
 \end{document}
 """,
         encoding="utf-8",
