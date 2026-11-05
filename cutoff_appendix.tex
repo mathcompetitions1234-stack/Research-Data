@@ -1,0 +1,34 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+
+\title{Appendix. Cutoffs of unlabeled trees}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{plain}
+\vspace{-2.5em}
+
+Let $p\ge 2$, and let a \emph{shape} be an unlabeled tree on $p$ vertices. The \emph{diameter} of a shape is the number of edges on a longest path. For a labeling $P$ of a shape and a host order $t\ge p$, write $N(P,t)$ for the number of labeled trees on the vertex set $[t]$ that avoid $P$ as an ordered minor. Write $C(P)$ for the labeling obtained by replacing each label $i$ with $p+1-i$.
+
+The \emph{cutoff} of a shape is the smallest integer $t$ such that, for labelings $P$ and $Q$ of that shape,
+\[
+N(P,t)=N(Q,t) \quad\text{implies}\quad Q=P \text{ or } Q=C(P).
+\]
+At $t=p$ every labeling has the same count, so every cutoff is at least $p+1$. A cutoff is recorded only when every labeling has been counted at that host order and at every smaller host order down to $p+1$, and each of those smaller orders still has a collision outside a reversal pair.
+
+A \emph{spider} has a single vertex of degree greater than $2$; its legs are the path lengths from that vertex to the leaves. A pair of \emph{hubs} is the pair of vertices of degree greater than $2$. Their distance is the number of edges of the unique path joining them, and an arm length is the number of edges from that hub out to a leaf along a path that does not contain the other hub. The two lists of arm lengths are written in the same order as the two degrees. The one remaining shape has three vertices of degree $3$, and the three numbers are the pairwise distances among those vertices.
+
+Table~\ref{tab:cutoffs} lists every unlabeled tree on $4\le p\le 8$ vertices. Forty-one cutoffs are exact. The four marked entries on eight vertices are lower bounds.
+
+\input{cutoff_table.tex}
+
+\end{document}
